@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Naga's Hotel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="navbar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Naga's Hotel Logo" height="40">
+            Naga's Hotel
+        </div>
+
+        <nav class="menu">
+
+            <a href="{{ url_for('sobre') }}">Sobre Nós</a>
+            <a href="{{ url_for('contato') }}">Contato</a>
+
+            {% if 'usuario_id' in session %}
+                <a href="/quartos">Quartos</a>
+                <a href="/clientes">Clientes</a>
+                <a href="/reservas">Reservas</a>
+            {% endif %}
+        </nav>
+
+        <div class="auth-btns">
+            {% if 'usuario_id' not in session %}
+                <a href="/login">Login</a>
+                <a href="/register">Registrar</a>
+            {% else %}
+                <a href="/logout" class="logout">Sair</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for categoria, msg in messages %}
+            <div class="flash {{ categoria }}">{{ msg }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+{% block content %}
+<main>
+    <div class="welcome-box">
+        <h2 class="welcome-title">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="welcome-logo">
+            Naga's Hotel
+        </h2>
+        <p>Onde a gente cuida de você</p>
+    </div>
+</main>
+{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Reservas - Naga's Hotel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header>
+    <div class="navbar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Naga's Hotel" height="40">
+            Naga's Hotel
+        </div>
+        <nav class="menu">
+            <a href="{{ url_for('index') }}">Início</a>
+        </nav>
+        <div class="auth-btns">
+            <a href="{{ url_for('logout') }}" class="logout">Sair</a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="reservas-box">
+        <h2>Lista de Reservas</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="crud-header">
+            <a href="{{ url_for('reserva.novo') }}" class="btn-adicionar">Adicionar Nova Reserva</a>
+        </div>
+
+        {% if reservas %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Quarto</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reserva in reservas %}
+                <tr>
+                    <td>{{ reserva.id }}</td>
+                    <td>{{ reserva.cliente_nome }}</td>
+                    <td>{{ reserva.quarto_numero }}</td>
+                    <td>{{ reserva.data_inicio.strftime('%d/%m/%Y') if reserva.data_inicio else '' }}</td>
+                    <td>{{ reserva.data_fim.strftime('%d/%m/%Y') if reserva.data_fim else '' }}</td>
+                    <td>{{ reserva.status }}</td>
+                    <td class="actions">
+                        <a href="{{ url_for('reserva.editar', id=reserva.id) }}" class="btn-editar">Editar</a>
+                        <form method="POST" action="{{ url_for('reserva.excluir', id=reserva.id) }}" style="display: inline;">
+                            <button type="submit" class="btn-excluir" onclick="return confirm('Tem certeza que deseja excluir a Reserva #{{ reserva.id }}?')">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Nenhuma reserva cadastrada.</p>
+        {% endif %}
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titulo }} - Naga's Hotel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<header>
+    <div class="navbar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Naga's Hotel" height="40">
+            Naga's Hotel
+        </div>
+        <nav class="menu">
+            <a href="{{ url_for('index') }}">Início</a>
+        </nav>
+        <div class="auth-btns">
+            <a href="{{ url_for('logout') }}" class="logout">Sair</a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <h2>{{ titulo }}</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="">
+
+        <div class="cliente-acom-wrapper">
+
+            <div class="cliente-wrapper">
+                <label for="cliente_id">Cliente</label>
+                <select name="cliente_id" id="cliente_id" required>
+                    <option value="">Selecione um Cliente</option>
+                    {% for cliente in clientes %}
+                    <option value="{{ cliente.id }}" {% if reserva and reserva.cliente_id|string == cliente.id|string %}selected{% endif %}>
+                        {{ cliente.nome }} ({{ cliente.email }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="acom-wrapper">
+                <div>
+                    <label>Adultos</label>
+                    <select name="adultos" id="adultos" required>
+                        <option value="0" {% if reserva and reserva.adultos == 0 %}selected{% endif %}>0</option>
+                        <option value="1" {% if reserva and reserva.adultos == 1 %}selected{% endif %}>1</option>
+                        <option value="2" {% if reserva and reserva.adultos == 2 %}selected{% endif %}>2</option>
+                        <option value="3" {% if reserva and reserva.adultos == 3 %}selected{% endif %}>3</option>
+                        <option value="4" {% if reserva and reserva.adultos == 4 %}selected{% endif %}>4</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Crianças</label>
+                    <select name="criancas" id="criancas" required>
+                        <option value="0" {% if reserva and reserva.criancas == 0 %}selected{% endif %}>0</option>
+                        <option value="1" {% if reserva and reserva.criancas == 1 %}selected{% endif %}>1</option>
+                        <option value="2" {% if reserva and reserva.criancas == 2 %}selected{% endif %}>2</option>
+                        <option value="3" {% if reserva and reserva.criancas == 3 %}selected{% endif %}>3</option>
+                        <option value="4" {% if reserva and reserva.criancas == 4 %}selected{% endif %}>4</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <label for="quarto_id">Quarto</label>
+        <select name="quarto_id" id="quarto_id" required>
+            <option value="">Selecione um Quarto</option>
+            {% for quarto in quartos %}
+            <option value="{{ quarto.id }}" {% if reserva and reserva.quarto_id|string == quarto.id|string %}selected{% endif %}>
+                {{ quarto.numero }} - {{ quarto.tipo }} (R$ {{ "%.2f"|format(quarto.preco) }})
+            </option>
+            {% endfor %}
+        </select>
+
+        <label for="data_checkin">Check-in</label>
+        <input type="date" name="data_checkin" id="data_checkin"
+               value="{{ reserva.data_checkin if reserva else '' }}" required>
+
+        <label for="data_checkout">Check-out</label>
+        <input type="date" name="data_checkout" id="data_checkout"
+               value="{{ reserva.data_checkout if reserva else '' }}" required>
+
+        {% if reserva %}
+        <label for="status">Status</label>
+        <select name="status" id="status" required>
+            <option value="Confirmada" {% if reserva.status == "Confirmada" %}selected{% endif %}>Confirmada</option>
+            <option value="Em Andamento" {% if reserva.status == "Em Andamento" %}selected{% endif %}>Em Andamento</option>
+            <option value="Finalizada" {% if reserva.status == "Finalizada" %}selected{% endif %}>Finalizada</option>
+            <option value="Cancelada" {% if reserva.status == "Cancelada" %}selected{% endif %}>Cancelada</option>
+        </select>
+        {% endif %}
+
+        <button type="submit">Salvar</button>
+    </form>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titulo }} - Naga's Hotel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<header>
+    <div class="navbar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Naga's Hotel" height="40">
+            Naga's Hotel
+        </div>
+        <nav class="menu">
+            <a href="{{ url_for('index') }}">Início</a>
+        </nav>
+        <div class="auth-btns">
+            <a href="{{ url_for('logout') }}" class="logout">Sair</a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <h2>{{ titulo }}</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="" enctype="multipart/form-data">
+        <label for="nome">Nome</label>
+        <input type="text" name="nome" id="nome" value="{{ cliente.nome if cliente else '' }}" required>
+
+        <label for="email">E-mail</label>
+        <input type="email" name="email" id="email" value="{{ cliente.email if cliente else '' }}" required>
+
+        <label for="telefone">Telefone</label>
+        <input type="text" name="telefone" id="telefone" value="{{ cliente.telefone if cliente else '' }}">
+
+        <label for="documento">Documento do Cliente (PDF, IMG...)</label>
+        <input type="file" name="documento" id="documento">
+
+        {% if cliente and cliente.documento %}
+            <p>Documento atual:
+                <a href="/static/uploads/clientes/{{ cliente.documento }}" target="_blank">
+                    Baixar documento
+                </a>
+            </p>
+        {% endif %}
+
+        <button type="submit">Salvar</button>
+    </form>
+</main>
+
+</body>
+</html>

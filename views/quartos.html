@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Quartos - Naga's Hotel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header>
+    <div class="navbar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Naga's Hotel" height="40">
+            Naga's Hotel
+        </div>
+        <nav class="menu">
+            <a href="{{ url_for('index') }}">Início</a>
+        </nav>
+        <div class="auth-btns">
+            <a href="{{ url_for('logout') }}" class="logout">Sair</a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="quartos-box">
+        <h2>Lista de Quartos</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="crud-header">
+            <a href="{{ url_for('quarto.novo') }}" class="btn-adicionar">Adicionar Novo Quarto</a>
+        </div>
+
+        {% if quartos %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Número</th>
+                    <th>Tipo</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for quarto in quartos %}
+                <tr>
+                    <td>{{ quarto.id }}</td>
+                    <td>{{ quarto.numero }}</td>
+                    <td>{{ quarto.tipo }}</td>
+                    <td>R$ {{ "%.2f"|format(quarto.preco) }}</td>
+                    <td>{{ quarto.status }}</td>
+                    <td class="actions">
+                        <a href="{{ url_for('quarto.editar', id=quarto.id) }}" class="btn-editar">Editar</a>
+                        <form method="POST" action="{{ url_for('quarto.excluir', id=quarto.id) }}" style="display:inline;">
+                            <button type="submit" class="btn-excluir" onclick="return confirm('Tem certeza que deseja excluir o quarto {{ quarto.numero }}?')">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Nenhum quarto cadastrado.</p>
+        {% endif %}
+    </div>
+</main>
+</body>
+</html>

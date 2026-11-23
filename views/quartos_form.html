@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titulo }} - Naga's Hotel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<header>
+    <div class="navbar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Naga's Hotel" height="40">
+            Naga's Hotel
+        </div>
+        <nav class="menu">
+            <a href="{{ url_for('index') }}">Início</a>
+        </nav>
+        <div class="auth-btns">
+            <a href="{{ url_for('logout') }}" class="logout">Sair</a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <h2>{{ titulo }}</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="">
+        <label for="numero">Número do Quarto</label>
+        <input type="text" name="numero" id="numero" placeholder="Ex: 101" 
+               value="{{ quarto.numero if quarto else '' }}" required>
+
+        <label for="tipo">Tipo</label>
+        <select name="tipo" id="tipo" required>
+            <option value="Simples" {% if quarto and quarto.tipo == "Simples" %}selected{% endif %}>Simples</option>
+            <option value="Suíte" {% if quarto and quarto.tipo == "Suíte" %}selected{% endif %}>Suíte</option>
+            <option value="Luxo" {% if quarto and quarto.tipo == "Luxo" %}selected{% endif %}>Luxo</option>
+        </select>
+
+        <label for="valor">Valor (Diária)</label>
+        <input type="number" step="0.01" name="valor" id="valor" placeholder="Ex: 150.00" 
+               value="{{ quarto.valor if quarto else '' }}" required>
+
+        {% if quarto %}
+        <label for="status">Status</label>
+        <select name="status" id="status" required>
+            <option value="Disponível" {% if quarto.status == "Disponível" %}selected{% endif %}>Disponível</option>
+            <option value="Ocupado" {% if quarto.status == "Ocupado" %}selected{% endif %}>Ocupado</option>
+            <option value="Manutenção" {% if quarto.status == "Manutenção" %}selected{% endif %}>Manutenção</option>
+        </select>
+        {% endif %}
+
+        <button type="submit">Salvar</button>
+    </form>
+</main>
+
+</body>
+</html>

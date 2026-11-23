@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Sobre Nós - Naga's Hotel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="navbar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Naga's Hotel" height="40">
+            Naga's Hotel
+        </div>
+
+        <nav class="menu">
+            <a href="{{ url_for('index') }}">Início</a>
+            <a href="{{ url_for('sobre') }}">Sobre Nós</a>
+            <a href="{{ url_for('contato') }}">Contato</a>
+        </nav>
+
+        <div class="auth-btns">
+            {% if 'usuario_id' not in session %}
+                <a href="/login">Login</a>
+            {% else %}
+                <a href="/logout" class="logout">Sair</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="welcome-box">
+        <h2>Sobre Nós</h2>
+        <p>
+            Somos uma plataforma desenvolvida por quatro amigos com o objetivo de oferecer 
+            praticidade, organização e cuidado nos pequenos detalhes. Nosso foco é tornar a 
+            experiência do usuário mais simples, eficiente e agradável.
+        </p>
+    </div>
+</main>
+
+</body>
+</html>
