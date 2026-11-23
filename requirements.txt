@@ -1,6 +1,8 @@
-flask
-flask-sqlalchemy
-flask-session
-bcrypt
-flask-mail
-python-dotenv
+
+Flask==3.1.2
+Flask-SQLAlchemy==3.1.1
+Flask-Session==0.8.0
+bcrypt==5.0.0
+Flask-Mail==0.10.0
+python-dotenv==1.2.4
+mysql-connector-python==9.5.0
