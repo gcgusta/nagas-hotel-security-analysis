@@ -1,9 +1,9 @@
 
 from flask import Flask, render_template, request, redirect, session, flash, send_from_directory, url_for
 from functools import wraps
+from urllib.parse import urljoin
 import os
 import secrets
-from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 from models import usuario_model
@@ -25,13 +25,24 @@ app.register_blueprint(reserva_controller.bp, url_prefix='/reservas')
 # Chave secreta carregada do ambiente
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
+# Endereço público confiável da aplicação
+app.config["PUBLIC_BASE_URL"] = os.getenv(
+    "PUBLIC_BASE_URL",
+    "http://127.0.0.1:5000"
+).rstrip("/")
+
 # Configurações de e-mail
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
 app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER")
+
+# Utiliza MAIL_USERNAME como alternativa ao remetente padrão
+app.config['MAIL_DEFAULT_SENDER'] = (
+    os.getenv("MAIL_DEFAULT_SENDER")
+    or app.config['MAIL_USERNAME']
+)
 
 mail = Mail(app)
 
@@ -45,7 +56,9 @@ def requer_login(f):
         if 'usuario_id' not in session:
             flash('Você precisa estar logado para acessar esta página.', 'error')
             return redirect('/login')
+
         return f(*args, **kwargs)
+
     return decorated_function
 
 
@@ -86,8 +99,10 @@ def login():
         if usuario:
             session["usuario_id"] = usuario["id"]
             session["usuario_nome"] = usuario["nome"]
+
             flash("Login realizado com sucesso!", "success")
             return redirect("/")
+
         else:
             flash("E-mail ou senha incorretos!", "error")
 
@@ -104,11 +119,18 @@ def esqueci_senha():
             token = secrets.token_urlsafe(16)
             usuario_model.salvar_token_reset(usuario["id"], token)
 
-            link = url_for("reset_senha", token=token, _external=True)
+            # Gera o caminho sem confiar no cabeçalho Host da requisição
+            caminho_reset = url_for("reset_senha", token=token)
+
+            # Monta o link usando o endereço confiável configurado no ambiente
+            link = urljoin(
+                app.config["PUBLIC_BASE_URL"] + "/",
+                caminho_reset.lstrip("/")
+            )
 
             msg = Message(
                 subject="Redefinição de Senha - Hotel App",
-                sender=app.config['MAIL_DEFAULT_SENDER'],
+                sender=app.config["MAIL_DEFAULT_SENDER"],
                 recipients=[email]
             )
 
@@ -120,10 +142,20 @@ def esqueci_senha():
 
             try:
                 mail.send(msg)
-                flash("Um link de redefinição foi enviado para seu email.", "success")
-            except Exception as e:
-                print("Erro ao enviar email:", e)
-                flash("Não foi possível enviar o email. Verifique a configuração.", "error")
+
+                flash(
+                    "Um link de redefinição foi enviado para seu email.",
+                    "success"
+                )
+
+            except Exception:
+                app.logger.exception("ERRO DETALHADO AO ENVIAR EMAIL")
+
+                flash(
+                    "Não foi possível enviar o email. Verifique a configuração.",
+                    "error"
+                )
+
         else:
             flash("Email não encontrado.", "error")
 
@@ -147,6 +179,7 @@ def reset_senha(token):
             return render_template("reset_senha.html", token=token)
 
         usuario_model.redefinir_senha(usuario["id"], senha)
+
         flash("Senha atualizada com sucesso!", "success")
         return redirect("/login")
 
@@ -165,6 +198,7 @@ def register():
         if sucesso:
             flash("Conta criada com sucesso!", "success")
             return redirect("/login")
+
         else:
             flash("Erro: E-mail já cadastrado!", "error")
 
@@ -191,7 +225,11 @@ def upload():
         flash("Nome de arquivo inválido!", "error")
         return redirect("/")
 
-    caminho = os.path.join(app.config["UPLOAD_FOLDER"], arquivo.filename)
+    caminho = os.path.join(
+        app.config["UPLOAD_FOLDER"],
+        arquivo.filename
+    )
+
     arquivo.save(caminho)
 
     flash("Arquivo enviado com sucesso!", "success")
