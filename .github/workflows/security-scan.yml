@@ -92,7 +92,6 @@ jobs:
       - name: Preparar análise
         run: rm -f osv.json
 
-      # Achados não reprovam a execução; erros na geração ou leitura do resultado são sinalizados.
       - name: Analisar dependências
         id: osv
         continue-on-error: true
@@ -100,6 +99,7 @@ jobs:
         with:
           scan-args: |-
             --recursive
+            --lockfile=requirements.txt:./laboratorio_sca/requirements.txt
             --format=json
             --output=osv.json
             ./
@@ -180,7 +180,6 @@ jobs:
                   '| --- | --- | --- | --- | --- |'
               ]
               for nome, versao, vuln, correcao, origem in achados[:30]:
-                  # O ID é codificado para não inserir Markdown vindo do scanner no endereço.
                   url = 'https://osv.dev/vulnerability/' + quote(vuln, safe='')
                   link = f'[{celula(vuln)}]({url})' if re.fullmatch(r'[A-Za-z0-9._-]+', vuln) else celula(vuln)
                   linhas.append(
