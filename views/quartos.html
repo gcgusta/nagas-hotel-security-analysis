@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -59,7 +60,10 @@
                     <td>{{ quarto.status }}</td>
                     <td class="actions">
                         <a href="{{ url_for('quarto.editar', id=quarto.id) }}" class="btn-editar">Editar</a>
+
                         <form method="POST" action="{{ url_for('quarto.excluir', id=quarto.id) }}" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
                             <button type="submit" class="btn-excluir" onclick="return confirm('Tem certeza que deseja excluir o quarto {{ quarto.numero }}?')">Excluir</button>
                         </form>
                     </td>

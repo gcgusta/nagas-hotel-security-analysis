@@ -1,7 +1,11 @@
 
-from flask import Flask, render_template, request, redirect, session, flash, send_from_directory, url_for
+from flask import (
+    Flask, render_template, request, redirect, session,
+    flash, send_from_directory, url_for
+)
 from functools import wraps
 from urllib.parse import urljoin
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 import os
 import secrets
 from dotenv import load_dotenv
@@ -18,12 +22,24 @@ load_dotenv()
 
 app = Flask(__name__, template_folder="views")
 
+# Chave secreta carregada do ambiente
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
+
+# Ativa proteção CSRF
+csrf = CSRFProtect(app)
+
+
+# Disponibiliza o token CSRF como texto em todos os templates
+@app.context_processor
+def inject_csrf_token():
+    token = generate_csrf()
+    return {"csrf_token": token}
+
+
+# Registra os blueprints
 app.register_blueprint(cliente_controller.bp, url_prefix='/clientes')
 app.register_blueprint(quarto_controller.bp, url_prefix='/quartos')
 app.register_blueprint(reserva_controller.bp, url_prefix='/reservas')
-
-# Chave secreta carregada do ambiente
-app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
 # Endereço público confiável da aplicação
 app.config["PUBLIC_BASE_URL"] = os.getenv(
@@ -46,15 +62,20 @@ app.config['MAIL_DEFAULT_SENDER'] = (
 
 mail = Mail(app)
 
+# Configuração de upload
 UPLOAD_FOLDER = "static/uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
+# Decorator para exigir login
 def requer_login(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'usuario_id' not in session:
-            flash('Você precisa estar logado para acessar esta página.', 'error')
+            flash(
+                'Você precisa estar logado para acessar esta página.',
+                'error'
+            )
             return redirect('/login')
 
         return f(*args, **kwargs)
@@ -119,10 +140,10 @@ def esqueci_senha():
             token = secrets.token_urlsafe(16)
             usuario_model.salvar_token_reset(usuario["id"], token)
 
-            # Gera o caminho sem confiar no cabeçalho Host da requisição
+            # Gera o caminho sem confiar no cabeçalho Host
             caminho_reset = url_for("reset_senha", token=token)
 
-            # Monta o link usando o endereço confiável configurado no ambiente
+            # Monta o link usando endereço confiável
             link = urljoin(
                 app.config["PUBLIC_BASE_URL"] + "/",
                 caminho_reset.lstrip("/")
@@ -149,10 +170,13 @@ def esqueci_senha():
                 )
 
             except Exception:
-                app.logger.exception("ERRO DETALHADO AO ENVIAR EMAIL")
+                app.logger.exception(
+                    "ERRO DETALHADO AO ENVIAR EMAIL"
+                )
 
                 flash(
-                    "Não foi possível enviar o email. Verifique a configuração.",
+                    "Não foi possível enviar o email. "
+                    "Verifique a configuração.",
                     "error"
                 )
 
@@ -176,14 +200,17 @@ def reset_senha(token):
 
         if senha != senha_confirma:
             flash("As senhas não coincidem.", "error")
-            return render_template("reset_senha.html", token=token)
+            return render_template(
+                "reset_senha.html",
+                token=token
+            )
 
         usuario_model.redefinir_senha(usuario["id"], senha)
 
         flash("Senha atualizada com sucesso!", "success")
         return redirect("/login")
 
-    return render_template("reset_senha.html", token=token)
+    return render_template("reset_senha.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -193,7 +220,11 @@ def register():
         email = request.form["email"]
         senha = request.form["senha"]
 
-        sucesso = usuario_model.registrar_usuario(nome, email, senha)
+        sucesso = usuario_model.registrar_usuario(
+            nome,
+            email,
+            senha
+        )
 
         if sucesso:
             flash("Conta criada com sucesso!", "success")
@@ -205,7 +236,8 @@ def register():
     return render_template("register.html")
 
 
-@app.route("/logout")
+# Logout protegido por POST e CSRF
+@app.route("/logout", methods=["POST"])
 def logout():
     session.clear()
     flash("Você saiu da conta.", "success")

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -34,7 +35,7 @@
         {% endwith %}
 
         <div class="crud-header">
-            <a href="{{ url_for("cliente.novo") }}" class="btn-adicionar">Adicionar Novo Cliente</a>
+            <a href="{{ url_for('cliente.novo') }}" class="btn-adicionar">Adicionar Novo Cliente</a>
         </div>
 
         {% if clientes %}
@@ -56,8 +57,11 @@
                     <td>{{ cliente.email }}</td>
                     <td>{{ cliente.telefone }}</td>
                     <td class="actions">
-                        <a href="{{ url_for("cliente.editar", id=cliente.id) }}" class="btn-editar">Editar</a>
-                        <form method="POST" action="{{ url_for("cliente.excluir", id=cliente.id) }}" style="display: inline;">
+                        <a href="{{ url_for('cliente.editar', id=cliente.id) }}" class="btn-editar">Editar</a>
+
+                        <form method="POST" action="{{ url_for('cliente.excluir', id=cliente.id) }}" style="display: inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
                             <button type="submit" class="btn-excluir" onclick="return confirm('Tem certeza que deseja excluir o cliente {{ cliente.nome }}?')">Excluir</button>
                         </form>
                     </td>

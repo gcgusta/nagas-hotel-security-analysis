@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -24,7 +25,10 @@
             {% if 'usuario_id' not in session %}
                 <a href="/login">Login</a>
             {% else %}
-                <a href="/logout" class="logout">Sair</a>
+                <form method="POST" action="{{ url_for('logout') }}" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button type="submit" class="logout">Sair</button>
+                </form>
             {% endif %}
         </div>
     </div>
@@ -34,8 +38,8 @@
     <div class="welcome-box">
         <h2>Sobre Nós</h2>
         <p>
-            Somos uma plataforma desenvolvida por quatro amigos com o objetivo de oferecer 
-            praticidade, organização e cuidado nos pequenos detalhes. Nosso foco é tornar a 
+            Somos uma plataforma desenvolvida por quatro amigos com o objetivo de oferecer
+            praticidade, organização e cuidado nos pequenos detalhes. Nosso foco é tornar a
             experiência do usuário mais simples, eficiente e agradável.
         </p>
     </div>
